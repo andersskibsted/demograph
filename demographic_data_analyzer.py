@@ -1,46 +1,83 @@
-import pandas as pd
-
-
 def calculate_demographic_data(print_data=True):
     # Read data from file
-    df = None
+    df = pd.read_csv('adult.data.csv')
+    #df.info()
+
 
 
 
     # How many of each race are represented in this dataset? This should be a Pandas series with race names as the index labels.
-    race_count = None
+    race_count = df['race'].value_counts()
 
     # What is the average age of men?
-    average_age_men = None
+
+    #men_age_mean = df[df['sex'] == 'Male'].get('age').mean()
+    #print(men_age_mean)
+    average_age_men = df[df['sex'] == 'Male'].get('age').mean()
 
     # What is the percentage of people who have a Bachelor's degree?
-    percentage_bachelors = None
+    number_of_bachelors = df['education'].value_counts().get('Bachelors', 0)
+    #print(f'numbre of bachelors {number_of_bachelors}')
+    
+    percentage_bachelors = (number_of_bachelors / df['education'].size) * 100
+   # print(df['education'].size)
 
+    #print(df['education-num'].unique(), df['education'].unique())
     # What percentage of people with advanced education (`Bachelors`, `Masters`, or `Doctorate`) make more than 50K?
     # What percentage of people without advanced education make more than 50K?
 
     # with and without `Bachelors`, `Masters`, or `Doctorate`
-    higher_education = None
-    lower_education = None
+    edu_series = df['education']
+    bachelors_bool = df['education'] == 'Bachelors'
+    masters_bool = df['education'] == 'Masters'
+    doctorate_bool = df['education'] == 'Doctorate'
+    
+    
+    higher_edu_bool = bachelors_bool | masters_bool | doctorate_bool
+    #print(higher_edu)
+    #print(df[higher_edu_bool]['salary'])
+    
+    higher_education_50k = df[higher_edu_bool]['salary'] == '>50K'
+    higher_education = higher_edu_bool.sum()
+
+    lower_edu_bool = ~higher_edu_bool
+
+    lower_education_50k = df[~higher_edu_bool]['salary'] == '>50K'
+    
+    lower_education = lower_edu_bool.sum()
 
     # percentage with salary >50K
-    higher_education_rich = None
-    lower_education_rich = None
+    higher_education_rich = (higher_education_50k.sum() / higher_education) * 100
+    lower_education_rich = (lower_education_50k.sum() / lower_education) * 100
 
     # What is the minimum number of hours a person works per week (hours-per-week feature)?
-    min_work_hours = None
+    min_work_hours = df['hours-per-week'].min()
+    
 
     # What percentage of the people who work the minimum number of hours per week have a salary of >50K?
-    num_min_workers = None
+    works_min_hours = df[df['hours-per-week'] == min_work_hours]
+    works_min_hours_rich = works_min_hours['salary'] == '>50K'
+    num_min_workers = works_min_hours.size
 
-    rich_percentage = None
+    rich_percentage = (works_min_hours_rich.sum() / num_min_workers) * 100
 
     # What country has the highest percentage of people that earn >50K?
-    highest_earning_country = None
-    highest_earning_country_percentage = None
+    total_in_countries = df['native-country'].value_counts()
+    high_earners = df[df['salary'] == '>50K']
+    high_earners_in_countries = high_earners['native-country'].value_counts()
+    high_earners_in_countries_perc = high_earners_in_countries/total_in_countries
+
+    #print(high_earners_in_countries_perc)
+      
+    highest_earning_country = high_earners_in_countries_perc.idxmax()
+    highest_earning_country_percentage = high_earners_in_countries_perc.max() * 100
 
     # Identify the most popular occupation for those who earn >50K in India.
-    top_IN_occupation = None
+    high_earners_in = df['salary'] == '>50K'
+    india = df['native-country'] == 'India'
+    high_earners_in_India_bool = high_earners_in & india
+    df[high_earners_in_India_bool]['occupation'].value_counts().idxmax()
+    top_IN_occupation = df[high_earners_in_India_bool]['occupation'].value_counts().idxmax()
 
     # DO NOT MODIFY BELOW THIS LINE
 
@@ -55,7 +92,7 @@ def calculate_demographic_data(print_data=True):
         print("Country with highest percentage of rich:", highest_earning_country)
         print(f"Highest percentage of rich people in country: {highest_earning_country_percentage}%")
         print("Top occupations in India:", top_IN_occupation)
-
+    
     return {
         'race_count': race_count,
         'average_age_men': average_age_men,
@@ -68,4 +105,6 @@ def calculate_demographic_data(print_data=True):
         'highest_earning_country_percentage':
         highest_earning_country_percentage,
         'top_IN_occupation': top_IN_occupation
+    
     }
+    
