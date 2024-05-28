@@ -1,5 +1,4 @@
 import pandas as pd  
-
 def calculate_demographic_data(print_data=True):
     # Read data from file
     df = pd.read_csv('adult.data.csv')
@@ -53,7 +52,8 @@ def calculate_demographic_data(print_data=True):
     # What percentage of the people who work the minimum number of hours per week have a salary of >50K?
     works_min_hours = df[df['hours-per-week'] == min_work_hours]
     works_min_hours_rich = works_min_hours['salary'] == '>50K'
-    num_min_workers = works_min_hours.size
+
+    num_min_workers = works_min_hours_rich.size
 
     rich_percentage = ((works_min_hours_rich.sum() / num_min_workers) * 100).round(1)
 
@@ -101,3 +101,4 @@ def calculate_demographic_data(print_data=True):
         'top_IN_occupation': top_IN_occupation
     
     }
+    
